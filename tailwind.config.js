@@ -30,6 +30,20 @@ export default {
       },
       borderRadius: {
         'md': '0.375rem', // Bo góc vừa phải theo yêu cầu
+      },
+      keyframes: {
+        seatPop: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.15)' },
+        },
+        fadeInUp: {
+          'from': { opacity: 0, transform: 'translateY(15px)' },
+          'to': { opacity: 1, transform: 'translateY(0)' },
+        }
+      },
+      animation: {
+        seatPop: 'seatPop 0.25s ease-out',
+        fadeInUp: 'fadeInUp 0.4s ease-out forwards',
       }
     },
   },
