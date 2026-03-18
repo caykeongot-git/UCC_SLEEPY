@@ -2,7 +2,7 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center space-y-6">
       <h1 className="text-primary-500">Cinema Web Setup Complete!</h1>
-      <p className="text-light-300">Hệ thống rạp phim chuẩn Moshi - Design System đã được ốp xong.</p>
+      <p className="text-light-300">Hệ thống rạp phim chuẩn Design System đã được ốp xong.</p>
       
       <div className="flex gap-4">
         <button className="btn-primary">
