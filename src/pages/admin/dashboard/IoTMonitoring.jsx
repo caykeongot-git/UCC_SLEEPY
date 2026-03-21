@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Thermometer, Monitor, Power, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from '../../../utils/cn';
+import { apiService } from '../../../services/apiService';
 
 const DeviceCard = ({ name, type, status, value, unit }) => {
   const isOnline = status === 'active';
@@ -42,14 +43,17 @@ const DeviceCard = ({ name, type, status, value, unit }) => {
 };
 
 const IoTMonitoring = () => {
-  const [devices, setDevices] = useState([
-    { id: 1, name: 'Phòng chiếu 01', type: 'temp', status: 'active', value: 24.5, unit: '°C' },
-    { id: 2, name: 'Phòng chiếu 02', type: 'temp', status: 'active', value: 23.8, unit: '°C' },
-    { id: 3, name: 'Máy chiếu P01', type: 'projector', status: 'active', value: '4K', unit: 'Status' },
-    { id: 4, name: 'Máy chiếu P02', type: 'projector', status: 'offline', value: '-', unit: 'Err' },
-  ]);
+  const [devices, setDevices] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Lấy dữ liệu khởi tạo từ Backend
+    apiService.getIoTDevices().then(res => {
+      setDevices(res);
+      setLoading(false);
+    });
+
+    // Giữ hiệu ứng giả lập realtime sau khi có dữ liệu từ backend
     const interval = setInterval(() => {
       setDevices(prev => prev.map(d => 
         d.type === 'temp' && d.status === 'active'
@@ -60,10 +64,12 @@ const IoTMonitoring = () => {
     return () => clearInterval(interval);
   }, []);
 
+  if (loading) return <div className="h-48 flex items-center justify-center text-light-500 font-bold italic animate-pulse">ĐANG KIỂM TRA TRẠNG THÁI THIẾT BỊ...</div>;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between border-b border-dark-700 pb-4">
-        <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-light-100">Giám sát hệ thống IoT</h3>
+        <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-light-100">Giám sát hệ thống IoT (Dữ liệu Backend)</h3>
         <span className="text-[10px] font-bold text-primary-500 uppercase tracking-widest bg-primary-500/10 px-3 py-1 rounded-full animate-pulse">Live Update</span>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
