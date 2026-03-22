@@ -118,7 +118,7 @@ export const getDynamicMovies = () => {
 
     // We treat the images as movie representations
     return {
-      id: `dyn-${index}`,
+      id: `dyn-${baseName.toLowerCase()}`,
       title: title,
       genre: customData.genre || "Phim Nổi Bật",
       ageRating: "C16",

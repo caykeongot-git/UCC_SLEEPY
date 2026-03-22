@@ -86,7 +86,7 @@ const HeroBanner = () => {
                   <motion.div 
                     variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="flex items-center gap-3 mb-4 pointer-events-auto"
+                    className={`flex items-center gap-3 mb-4 ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
                   >
                     <span className="px-2 py-1 text-xs font-bold bg-primary-600 text-white rounded">{movie.age}</span>
                     <span className="text-light-300 text-sm font-medium">{movie.genre}</span>
@@ -95,7 +95,7 @@ const HeroBanner = () => {
                   <motion.h1 
                     variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="text-4xl md:text-5xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-light-300 mb-4 tracking-wide uppercase drop-shadow-2xl pointer-events-auto"
+                    className={`text-4xl md:text-5xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-light-300 mb-4 tracking-wide uppercase drop-shadow-2xl ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
                   >
                     {movie.title}
                   </motion.h1>
@@ -103,7 +103,7 @@ const HeroBanner = () => {
                   <motion.p 
                     variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="text-light-300 text-sm md:text-lg mb-8 max-w-2xl drop-shadow-md leading-relaxed pointer-events-auto"
+                    className={`text-light-300 text-sm md:text-lg mb-8 max-w-2xl drop-shadow-md leading-relaxed ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
                   >
                     {movie.description}
                   </motion.p>
@@ -111,7 +111,7 @@ const HeroBanner = () => {
                   <motion.div 
                     variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="flex flex-wrap items-center gap-4 pointer-events-auto"
+                    className={`flex flex-wrap items-center gap-4 ${isActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
                   >
                     <Link to={`/booking?movie=${movie.id}`} className="group flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-500 text-white px-8 py-3.5 rounded-full font-bold transition-all shadow-[0_0_20px_rgba(14,165,233,0.4)] hover:shadow-[0_0_30px_rgba(14,165,233,0.6)] hover:-translate-y-1">
                       <Play size={20} fill="currentColor" className="group-hover:scale-110 transition-transform" /> MUA VÉ
