@@ -1,0 +1,5 @@
+Bạn hãy copy hình ảnh (jpg, png) các bộ phim muốn hiển thị thả vào thư mục này nhé! Trình duyệt sẽ tự nhận diện và đẩy lên trang chủ.
+Quy định đặt tên file:
+- Ảnh dọc (Poster): tên-phim_poster.jpg (Ví dụ: terminator_poster.jpg)
+- Ảnh ngang (Banner): tên-phim_banner.jpg (Ví dụ: terminator_banner.jpg)
+Tên phim sẽ được tự động trích xuất từ phần "tên-phim" của file gốc!
