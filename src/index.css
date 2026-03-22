@@ -1,48 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply bg-dark-900 text-light-300 font-sans antialiased;
+:root {
+  --luminary-bg: #f8fafc;
+  --luminary-bg-sidebar: #ffffff;
+  --luminary-text: #0f172a;
+  --luminary-border: #e2e8f0;
+  --luminary-accent: #0ea5e9;
+  --luminary-accent-glow: rgba(14, 165, 233, 0.2);
+}
+
+.dark {
+  --luminary-bg: #020617;
+  --luminary-bg-sidebar: #0f172a;
+  --luminary-text: #f8fafc;
+  --luminary-border: rgba(255, 255, 255, 0.05);
+  --luminary-accent: #22d3ee;
+  --luminary-accent-glow: rgba(34, 211, 238, 0.4);
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--luminary-bg);
+  color: var(--luminary-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+@layer utilities {
+  .glass-premium {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply text-light-100 font-bold;
-  }
-
-  h1 {
-    @apply text-4xl;
-  }
-
-  h2 {
-    @apply text-2xl font-semibold;
+  .dark .glass-premium {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   }
   
-  /* Mặc định cho scrollbar cho chuẩn vibe dark mode */
-  ::-webkit-scrollbar {
-    width: 8px;
+  .cyan-glow {
+    box-shadow: 0 0 20px var(--luminary-accent-glow);
   }
-  ::-webkit-scrollbar-track {
-    @apply bg-dark-900;
+  
+  .text-cyan-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500;
   }
-  ::-webkit-scrollbar-thumb {
-    @apply bg-dark-700 rounded-full hover:bg-dark-800 transition-colors;
+
+  .dark .text-cyan-gradient {
+    background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 50%, #2563eb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-glow-cyan {
+    text-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+  }
+
+  @keyframes neon-radiate {
+    0%, 100% {
+      text-shadow: 
+        0 0 5px rgba(255, 255, 255, 0.8),
+        0 0 10px rgba(255, 255, 255, 0.6),
+        0 0 20px rgba(34, 211, 238, 0.8),
+        0 0 40px rgba(14, 165, 233, 0.6),
+        0 0 80px rgba(14, 165, 233, 0.4);
+    }
+    50% {
+      text-shadow: 
+        0 0 2px rgba(255, 255, 255, 0.5),
+        0 0 5px rgba(255, 255, 255, 0.3),
+        0 0 10px rgba(34, 211, 238, 0.5),
+        0 0 20px rgba(14, 165, 233, 0.3),
+        0 0 40px rgba(14, 165, 233, 0.2);
+    }
+  }
+
+  .text-neon-radiate {
+    animation: neon-radiate 3s ease-in-out infinite;
+  }
+
+  .bg-cyan-gradient {
+    @apply bg-gradient-to-r from-sky-500 to-cyan-400;
+  }
+
+  .dark .bg-cyan-gradient {
+    background: linear-gradient(to right, #22d3ee, #0ea5e9);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
-@layer components {
-  /* Anh em có thể dùng các class này để nhanh hơn hoặc gõ tay class tailwind đều được */
-  
-  .btn-primary {
-    @apply bg-primary-500 hover:bg-primary-600 text-white rounded-md px-6 py-2 transition-all duration-300;
-  }
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--luminary-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
 
-  .input-cinema {
-    @apply bg-dark-800 border border-dark-700 focus:border-primary-500 rounded-md text-light-100 px-4 py-2 outline-none transition-all duration-300;
-  }
+/* Material UI Ripple Effect */
+.ripple-btn {
+  position: relative;
+  overflow: hidden;
+}
 
-  .glass-effect {
-    @apply bg-dark-900/80 backdrop-blur-md;
-  }
+.ripple-btn::after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.7) 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform .5s, opacity 1s;
+}
+
+.ripple-btn:active::after {
+  transform: scale(0, 0);
+  opacity: 0.5;
+  transition: 0s;
+}
+
+/* Shake Animation for Delete Buttons */
+@keyframes shake-trash {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-15deg) scale(1.1); }
+  50% { transform: rotate(15deg) scale(1.1); }
+  75% { transform: rotate(-15deg) scale(1.1); }
+}
+
+.hover-btn-delete:hover svg {
+  animation: shake-trash 0.4s ease-in-out;
 }
