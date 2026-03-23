@@ -1,210 +1,182 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
-import { paymentService } from '../../services/paymentService';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 
-// 1. DỮ LIỆU MẪU CHUẨN MÀU TỐI
 const mockTickets = [{
   id: 'ORD-UCC-777',
   status: 'Thành công',
   posterThumbnail: "https://image.tmdb.org/t/p/w500/1E5baAaEse26fej7uHcjS3KyUjZ.jpg",
-  movieTitle: 'Lật Mặt 7: Một Điều Ước',
-  format: '2D • Rạp 03',
-  showDate: '20.05.2024',
-  showTime: '19:30',
-  seats: 'A10, A11',
-  qrCodeValue: 'UCC-777-LATMAT7',
+  movieTitle: 'Dune: Part Two',
+  format: 'IMAX 2D • Cinema 4',
+  showDate: 'Today, 07:30 PM',
+  seats: 'G6, G7',
+  qrCodeValue: 'UCC-777-DUNE',
 }];
 
 const mockTransactions = [
-  {
-    id: 'TXN-UCC-10293',
-    date: '19.03.2026',
-    time: '14:20',
-    content: 'Thanh toán vé Dune: Part Two',
-    amount: 240000,
-    method: 'MoMo',
-    status: 'Thành công'
-  }
+  { id: 'TXN-1', content: 'Dune: Part Two', amount: 240000, date: '19.03.2026', method: 'MoMo', status: 'Success' }
 ];
 
 const OrderHistory = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('tickets');
-  const [tickets, setTickets] = useState(mockTickets);
-  const [transactions, setTransactions] = useState(mockTransactions);
+  const [tickets, setTickets] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [qrCountdown, setQrCountdown] = useState(30);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     const timer = setInterval(() => setQrCountdown(p => p <= 1 ? 30 : p - 1), 1000);
-    return () => clearInterval(timer);
-  }, []);
+    
+    const loadData = setTimeout(() => {
+      setTickets(mockTickets);
+      setTransactions(mockTransactions);
+      setLoading(false);
+    }, 500);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await paymentService.getPaymentHistory();
-        const finalData = Array.isArray(response) ? response : (response?.data || []);
-        
-        if (finalData.length > 0) {
-          setTickets(finalData);
-          setTransactions(finalData.map(item => ({
-            id: `TXN-${item.id}`,
-            date: item.showDate,
-            time: item.showTime,
-            content: `Vé phim: ${item.movieTitle}`,
-            amount: 120000, 
-            method: 'MoMo',
-            status: 'Thành công'
-          })));
-        }
-      } catch (err) {
-        console.error("Lỗi tải dữ liệu:", err);
-      } finally {
-        setLoading(false);
-      }
+    return () => {
+      clearInterval(timer);
+      clearTimeout(loadData);
     };
-    fetchData();
   }, []);
 
   const formatVnd = (value) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 
   return (
-    <div className="min-h-screen bg-dark-900 text-light-100 flex flex-col items-center pt-10 px-4 pb-20 font-sans transition-colors duration-300">
-      <div className="w-full max-w-[420px]">
-        
-        {/* HEADER & TAB SWITCHER */}
-        <div className="mb-10 text-center">
-          {/* ĐỔI SANG XANH: border-[#0066FF] và text-[#0066FF] */}
-          <h2 className="text-3xl font-black uppercase italic mb-8 border-l-8 border-[#0066FF] pl-6 text-left text-white tracking-tighter leading-none">
-            History <span className="text-[#0066FF]">& Tickets</span>
-          </h2>
-          
-          <div className="flex bg-dark-800 rounded-full p-1 shadow-inner border border-dark-700">
-            <button 
-              onClick={() => setActiveTab('tickets')}
-              className={`flex-1 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                activeTab === 'tickets' 
-                  ? 'bg-dark-700 text-[#0066FF] shadow-md border border-[#0066FF]/20' 
-                  : 'text-light-600 hover:text-white'
-              }`}
-            >
-              🎟️ My Tickets
-            </button>
-            <button 
-              onClick={() => setActiveTab('transactions')}
-              className={`flex-1 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                activeTab === 'transactions' 
-                  ? 'bg-dark-700 text-[#0066FF] shadow-md border border-[#0066FF]/20' 
-                  : 'text-light-600 hover:text-white'
-              }`}
-            >
-              💳 Transactions
-            </button>
+    <div className="min-h-screen bg-[#050a14] flex text-white font-sans">
+      
+      {/* SIDEBAR - Cố định bên trái */}
+      <aside className="w-[260px] bg-[#0b1222] border-r border-slate-800 p-6 flex flex-col sticky top-0 h-screen z-10 shrink-0">
+        <div className="flex items-center gap-3 mb-10 group cursor-pointer" onClick={() => navigate('/')}>
+          <div className="w-10 h-10 bg-[#0066FF] rounded-xl flex items-center justify-center shadow-lg shadow-[#0066FF]/20 transition-transform group-hover:scale-105">
+            <span className="text-xl">🎬</span>
           </div>
+          <h1 className="text-xl font-black tracking-tighter uppercase italic text-white leading-none">
+            Cinema <span className="text-[#0066FF]">Quantum</span>
+          </h1>
         </div>
 
-        {/* LOADING STATE */}
-        {loading && (
-          <div className="text-center py-20 animate-pulse text-[#0066FF] font-bold uppercase text-xs tracking-widest">
-            LOADING DATA...
+        <nav className="flex-1 space-y-3">
+          <button onClick={() => navigate('/checkout')} className="w-full flex items-center gap-3 p-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 hover:bg-slate-800 hover:text-slate-200 transition-all">
+            <span>💳</span> Checkout
+          </button>
+          <button className="w-full flex items-center gap-3 p-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] bg-[#0066FF]/20 text-[#0066FF] border border-[#0066FF]/30">
+            <span>🎟️</span> My Tickets
+          </button>
+        </nav>
+
+        <div className="flex items-center gap-3 bg-dark-800 p-1.5 pr-5 rounded-full border border-dark-700 mt-auto">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ngoc&backgroundColor=ff4b4b" alt="User" className="w-8 h-8 rounded-full bg-dark-700 border border-dark-600" />
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-white uppercase tracking-tighter">Ngọc Nguyễn</span>
+            <span className="text-[8px] font-bold text-[#0066FF] uppercase leading-none">VIP Member</span>
           </div>
-        )}
+        </div>
+      </aside>
 
-        {/* TAB 1: MY TICKETS */}
-        {!loading && activeTab === 'tickets' && (
-          <div className="space-y-10">
-            {tickets.map((ticket) => (
-              <div key={ticket.id} className="shadow-2xl group transition-all duration-500 hover:-translate-y-1 relative">
-                
-                <div className="bg-dark-800 rounded-t-3xl border-x border-t border-dark-700 p-8 relative overflow-hidden">
-                  {/* ĐỔI SANG XANH: bg-[#0066FF]/5 */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#0066FF]/5 blur-[60px] rounded-full"></div>
-                  
-                  <div className="flex gap-5 relative z-10">
-                    <img src={ticket.posterThumbnail} className="w-20 h-28 object-cover rounded-lg border border-dark-600 shadow-xl" alt="poster" />
-                    <div className="flex flex-col justify-center">
-                      <span className="text-[10px] font-black text-[#0066FF] uppercase mb-1 tracking-widest animate-pulse">● {ticket.status}</span>
-                      <h3 className="text-xl font-black uppercase text-white italic leading-tight mb-1">{ticket.movieTitle}</h3>
-                      <p className="text-[10px] text-light-500 font-bold uppercase tracking-tight">{ticket.format}</p>
-                    </div>
-                  </div>
-                  <div className="mt-6 grid grid-cols-2 gap-4 bg-dark-950/50 p-4 rounded-xl border border-dark-700/50 backdrop-blur-sm">
-                    <div>
-                      <p className="text-[8px] font-black text-light-600 uppercase mb-1 tracking-widest">Showtime</p>
-                      <p className="text-xs font-bold text-white">{ticket.showDate} <br/> {ticket.showTime}</p>
-                    </div>
-                    <div>
-                      <p className="text-[8px] font-black text-light-600 uppercase mb-1 tracking-widest">Your Seats</p>
-                      <p className="text-xs font-black text-[#0066FF] tracking-tighter">{ticket.seats}</p>
-                    </div>
-                  </div>
-                </div>
+      {/* MAIN CONTENT - Căn giữa nội dung */}
+      <main className="flex-1 p-10 overflow-y-auto flex flex-col items-center">
+        <div className="w-full max-w-[800px]"> {/* Container giới hạn độ rộng để cân đối */}
+          
+          <header className="mb-10 text-left w-full">
+            <h2 className="text-3xl font-black uppercase italic border-l-8 border-[#0066FF] pl-6 tracking-tighter leading-none">
+              History <span className="text-[#0066FF]">& Tickets</span>
+            </h2>
+          </header>
 
-                <div className="relative h-6 bg-dark-800 border-x border-dark-700 flex items-center">
-                  <div className="absolute -left-3 w-6 h-6 bg-dark-900 rounded-full border border-dark-700 shadow-inner"></div>
-                  <div className="w-full border-t-2 border-dashed border-dark-600/50 mx-4"></div>
-                  <div className="absolute -right-3 w-6 h-6 bg-dark-900 rounded-full border border-dark-700 shadow-inner"></div>
-                </div>
+          <div className="mb-10 w-full flex justify-start">
+            <div className="flex bg-[#0b1222] rounded-full p-1 border border-slate-800 w-full max-w-[420px]">
+              {['tickets', 'transactions'].map((tab) => (
+                <button 
+                  key={tab} 
+                  onClick={() => setActiveTab(tab)} 
+                  className={`flex-1 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                    activeTab === tab ? 'bg-[#0066FF] text-white shadow-lg' : 'text-slate-500 hover:text-white'
+                  }`}
+                >
+                  {tab === 'tickets' ? '🎟️ My Tickets' : '💳 Transactions'}
+                </button>
+              ))}
+            </div>
+          </div>
 
-                <div className="bg-dark-800 rounded-b-3xl border-x border-b border-dark-700 p-8 pt-4 flex flex-col items-center shadow-xl">
-                  <div className="bg-white p-3 rounded-2xl mb-4 shadow-[0_0_20px_rgba(255,255,255,0.05)] border-2 border-[#0066FF]/20">
-                    <QRCodeSVG value={ticket.qrCodeValue || 'UCC-777-LATMAT7'} size={150} level="H" includeMargin={false} />
-                  </div>
-                  <p className="text-[9px] font-black text-light-500 tracking-[0.3em] mb-1">REF ID: <span className="text-white font-black">{ticket.id}</span></p>
-                  <p className="text-[8px] text-[#0066FF] font-bold italic uppercase tracking-tighter animate-pulse">Cập nhật sau {qrCountdown} giây</p>
-                </div>
+          {/* PHẦN HIỂN THỊ CHÍNH */}
+          <div className="w-full flex justify-start">
+            {loading ? (
+              <div className="py-20 w-full text-center text-[#0066FF] font-black animate-pulse uppercase tracking-widest">
+                Quantum Loading...
               </div>
-            ))}
+            ) : (
+              <AnimatePresence mode="wait">
+                {activeTab === 'tickets' ? (
+                  <Motion.div 
+                    key="tkt" 
+                    initial={{ opacity: 0, y: 10 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    exit={{ opacity: 0, y: -10 }} 
+                    className="space-y-10 w-full max-w-[420px]"
+                  >
+                    {tickets.length === 0 ? (
+                      <div className="p-10 text-center text-slate-400 border border-dashed border-slate-700 rounded-2xl font-bold uppercase text-[10px]">
+                        No tickets found.
+                      </div>
+                    ) : (
+                      tickets.map((ticket) => (
+                        <div key={ticket.id} className="bg-[#0b1222] rounded-3xl border border-slate-800 overflow-hidden shadow-2xl">
+                          <div className="p-8">
+                            <div className="flex gap-5">
+                              <img src={ticket.posterThumbnail} className="w-20 h-28 object-cover rounded-lg border border-slate-700 shadow-md" alt="p" />
+                              <div>
+                                <span className="text-[10px] font-black text-[#0066FF] uppercase tracking-widest animate-pulse">● {ticket.status}</span>
+                                <h3 className="text-xl font-black uppercase italic mt-1 leading-tight">{ticket.movieTitle}</h3>
+                                <p className="text-[10px] text-slate-500 font-bold uppercase">{ticket.format}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="bg-[#050a14] p-8 flex flex-col items-center border-t border-slate-800">
+                            <div className="bg-white p-3 rounded-2xl mb-4 border-2 border-[#0066FF]/20">
+                              <QRCodeSVG value={ticket.qrCodeValue} size={140} />
+                            </div>
+                            <p className="text-[9px] font-black text-slate-500 tracking-[0.3em]">REF: {ticket.id}</p>
+                            <p className="text-[8px] text-[#0066FF] font-bold mt-1 uppercase">Updates in {qrCountdown}s</p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </Motion.div>
+                ) : (
+                  <Motion.div 
+                    key="txn" 
+                    initial={{ opacity: 0, y: 10 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    exit={{ opacity: 0, y: -10 }} 
+                    className="space-y-4 w-full max-w-[600px]"
+                  >
+                    {transactions.length === 0 ? (
+                      <div className="p-10 text-center text-slate-400 border border-dashed border-slate-700 rounded-2xl font-bold uppercase text-[10px]">
+                        No transactions found.
+                      </div>
+                    ) : (
+                      transactions.map((txn) => (
+                        <div key={txn.id} className="bg-[#0b1222] border border-slate-800 p-6 rounded-3xl hover:border-[#0066FF] transition-all group shadow-xl">
+                          <div className="flex justify-between items-center">
+                            <h4 className="font-black uppercase italic group-hover:text-[#0066FF] transition-colors">{txn.content}</h4>
+                            <p className="text-2xl font-black text-[#0066FF] italic">{formatVnd(txn.amount)}</p>
+                          </div>
+                          <p className="text-[10px] text-slate-500 font-bold uppercase mt-2">{txn.date} • {txn.method}</p>
+                        </div>
+                      ))
+                    )}
+                  </Motion.div>
+                )}
+              </AnimatePresence>
+            )}
           </div>
-        )}
 
-        {/* TAB 2: TRANSACTION HISTORY */}
-        {!loading && activeTab === 'transactions' && (
-          <div className="space-y-4">
-            {transactions.map((txn) => (
-              <div key={txn.id} className="bg-dark-800 border border-dark-700 p-6 rounded-3xl hover:border-[#0066FF] transition-all shadow-xl group">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <span className="text-[9px] font-bold text-light-600 uppercase tracking-widest">{txn.date} • {txn.time}</span>
-                    <h4 className="text-base font-black text-white uppercase italic mt-1 leading-tight group-hover:text-[#0066FF] transition-colors">
-                      {txn.content}
-                    </h4>
-                  </div>
-                  <span className="text-[8px] px-2.5 py-1 bg-green-500/10 text-green-500 rounded-md font-black uppercase tracking-widest italic animate-pulse">
-                    Success
-                  </span>
-                </div>
-                <div className="flex justify-between items-center pt-4 border-t border-dark-700/50">
-                  <span className="text-[10px] font-bold text-light-600 uppercase tracking-wider">Via {txn.method}</span>
-                  <p className="text-2xl font-black text-[#0066FF] italic tracking-tighter leading-none">
-                    -{formatVnd(txn.amount)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* EMPTY STATE */}
-        {!loading && (tickets.length === 0 || (activeTab === 'transactions' && transactions.length === 0)) && (
-          <div className="text-center py-20 text-light-600 font-bold uppercase text-xs italic tracking-widest">
-            NO DATA FOUND
-          </div>
-        )}
-
-        {/* NÚT ĐẶT VÉ MỚI: Đổi bg-[#0066FF] và hover:bg-blue-700 */}
-        <button 
-          onClick={() => navigate('/checkout')} 
-          className="w-full py-5 bg-[#0066FF] hover:bg-blue-700 text-white rounded-2xl font-black uppercase italic mt-10 shadow-lg shadow-[#0066FF]/20 active:scale-95 transition-all flex items-center justify-center gap-3 tracking-widest"
-        >
-          <span>+ Book New Ticket</span>
-          <span className="text-xl">🎟️</span>
-        </button>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };
