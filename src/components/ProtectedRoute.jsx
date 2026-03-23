@@ -1,11 +1,19 @@
-import { useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import useAuthStore from '../store/authStore';
 
 const ProtectedRoute = ({ allowedRoles }) => {
-  const { user } = useContext(AuthContext);
+  const user = useAuthStore(state => state.user);
+  const loading = useAuthStore(state => state.loading);
 
-  // Nếu chưa có user (chưa đăng nhập hoặc context chưa kịp cập nhật)
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-dark-900">
+        <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // Nếu chưa có user (chưa đăng nhập)
   if (!user) {
     return <Navigate to="/login" replace />;
   }

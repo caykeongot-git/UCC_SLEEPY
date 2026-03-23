@@ -1,20 +1,29 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import useAuthStore from './store/authStore';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import UserProfile from './pages/profile/UserProfile';
 import Membership from './pages/profile/Membership';
 import ProtectedRoute from './components/ProtectedRoute';
-import Header from './components/Header'; // 1. Đảm bảo đã import Header
+import Header from './components/Header';
+import BookingPage from './pages/BookingPage';
 
 function App() {
+  const fetchMe = useAuthStore(state => state.fetchMe);
+  
+  // Gọi hàm lấy thông tin User tự động khi tải App
+  useEffect(() => {
+    fetchMe();
+  }, [fetchMe]);
+
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
-        {/* 2. Đặt Header ở đây để nó luôn hiển thị sau khi đăng nhập */}
-        <Header /> 
-        
-        <main className="container mx-auto">
+      <div className="min-h-screen bg-dark-900 flex flex-col">
+        <Header />
+
+        <main className="flex-1">
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -23,12 +32,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/membership" element={<Membership />} />
-              <Route path="/" element={
-                <div className="p-10 text-center">
-                   <h1 className="text-3xl font-bold text-blue-600">Cinema Web Dashboard</h1>
-                   <p className="mt-4">Đăng nhập thành công! Hãy chọn Menu ở trên.</p>
-                </div>
-              } />
+              <Route path="/" element={<BookingPage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" />} />

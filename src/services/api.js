@@ -1,18 +1,29 @@
 import axios from 'axios';
+import useAuthStore from '../store/authStore';
+
+const baseURL = import.meta.env.VITE_API_URL || 'https://d133b5da81e5b3.lhr.life/api';
 
 const api = axios.create({
-  // Sử dụng biến môi trường hoặc fallback về localhost
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true',
+    'Bypass-Tunnel-Reminder': 'true'
+  }
 });
 
-// 1. Request Interceptor: Tự động đính kèm Token vào mọi yêu cầu gửi đi
+// Request Interceptor: Tự động trích xuất token từ Zustand Store và đính kèm vào Header
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken'); // Lấy token từ kho lưu trữ
+    // Trích xuất state token động hiện tại
+    const token = useAuthStore.getState().token;
+    
     if (token) {
-      // Kẹp Token vào Header theo chuẩn Bearer như yêu cầu của Leader
-      config.headers.Authorization = `Bearer ${token}`; 
+      // Yêu cầu bắt buộc: Authorization: Bearer <token>
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
+    
     return config;
   },
   (error) => {
@@ -20,14 +31,14 @@ api.interceptors.request.use(
   }
 );
 
-// 2. Response Interceptor: Xử lý phản hồi từ Server
+// Response Interceptor: Xử lý lỗi hệ thống chung
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Nếu Server trả về lỗi 401 (Unauthorized) nghĩa là Token đã hết hạn hoặc lỏ
+    // Nếu API trả về 401 Unauthorized do token sai hoặc hết hạn -> Tự động xoá trắng App Context / Store
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('accessToken'); // Xóa token cũ
-      window.location.href = '/login'; // Đá người dùng về trang đăng nhập
+      console.warn("Token hết hạn hoặc bị từ chối, tự động đăng xuất.");
+      useAuthStore.getState().logout();
     }
     return Promise.reject(error);
   }
