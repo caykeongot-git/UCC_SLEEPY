@@ -18,6 +18,19 @@ const mockTransactions = [
   { id: 'TXN-1', content: 'Dune: Part Two', amount: 240000, date: '19.03.2026', method: 'MoMo', status: 'Success' }
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100 } }
+};
+
 const OrderHistory = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('tickets');
@@ -33,7 +46,7 @@ const OrderHistory = () => {
       setTickets(mockTickets);
       setTransactions(mockTransactions);
       setLoading(false);
-    }, 500);
+    }, 1500); // Tăng thời gian load một chút để thấy hiệu ứng loading đẹp hơn
 
     return () => {
       clearInterval(timer);
@@ -47,7 +60,6 @@ const OrderHistory = () => {
   return (
     <div className="min-h-screen bg-[#050a14] flex text-white font-sans">
       
-      {/* SIDEBAR - Cố định bên trái */}
       <aside className="w-[260px] bg-[#0b1222] border-r border-slate-800 p-6 flex flex-col sticky top-0 h-screen z-10 shrink-0">
         <div className="flex items-center gap-3 mb-10 group cursor-pointer" onClick={() => navigate('/')}>
           <div className="w-10 h-10 bg-[#0066FF] rounded-xl flex items-center justify-center shadow-lg shadow-[#0066FF]/20 transition-transform group-hover:scale-105">
@@ -76,9 +88,8 @@ const OrderHistory = () => {
         </div>
       </aside>
 
-      {/* MAIN CONTENT - Căn giữa nội dung */}
       <main className="flex-1 p-10 overflow-y-auto flex flex-col items-center">
-        <div className="w-full max-w-[800px]"> {/* Container giới hạn độ rộng để cân đối */}
+        <div className="w-full max-w-[800px]">
           
           <header className="mb-10 text-left w-full">
             <h2 className="text-3xl font-black uppercase italic border-l-8 border-[#0066FF] pl-6 tracking-tighter leading-none">
@@ -102,20 +113,36 @@ const OrderHistory = () => {
             </div>
           </div>
 
-          {/* PHẦN HIỂN THỊ CHÍNH */}
           <div className="w-full flex justify-start">
             {loading ? (
-              <div className="py-20 w-full text-center text-[#0066FF] font-black animate-pulse uppercase tracking-widest">
-                Quantum Loading...
+              // HIỆU ỨNG LOADING QUANTUM
+              <div className="py-24 w-full text-center">
+                <Motion.div
+                  initial={{ opacity: 0, filter: "blur(5px)" }}
+                  animate={{ 
+                    opacity: [0, 1, 1, 0], 
+                    filter: ["blur(5px)", "blur(0px)", "blur(0px)", "blur(5px)"] 
+                  }}
+                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                  className="text-[#0066FF] font-black uppercase tracking-[0.3em] text-sm"
+                >
+                  Quantum Loading...
+                </Motion.div>
+                <Motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                  className="w-5 h-5 border-2 border-[#0066FF] border-t-transparent rounded-full mx-auto mt-6"
+                />
               </div>
             ) : (
               <AnimatePresence mode="wait">
                 {activeTab === 'tickets' ? (
                   <Motion.div 
                     key="tkt" 
-                    initial={{ opacity: 0, y: 10 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    exit={{ opacity: 0, y: -10 }} 
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="show"
+                    exit="hidden"
                     className="space-y-10 w-full max-w-[420px]"
                   >
                     {tickets.length === 0 ? (
@@ -124,7 +151,12 @@ const OrderHistory = () => {
                       </div>
                     ) : (
                       tickets.map((ticket) => (
-                        <div key={ticket.id} className="bg-[#0b1222] rounded-3xl border border-slate-800 overflow-hidden shadow-2xl">
+                        <Motion.div 
+                          key={ticket.id} 
+                          variants={itemVariants}
+                          whileHover={{ y: -5, boxShadow: "0px 10px 30px rgba(0, 102, 255, 0.2)", borderColor: "#0066FF" }}
+                          className="bg-[#0b1222] rounded-3xl border border-slate-800 overflow-hidden shadow-2xl transition-colors duration-300"
+                        >
                           <div className="p-8">
                             <div className="flex gap-5">
                               <img src={ticket.posterThumbnail} className="w-20 h-28 object-cover rounded-lg border border-slate-700 shadow-md" alt="p" />
@@ -135,23 +167,35 @@ const OrderHistory = () => {
                               </div>
                             </div>
                           </div>
-                          <div className="bg-[#050a14] p-8 flex flex-col items-center border-t border-slate-800">
-                            <div className="bg-white p-3 rounded-2xl mb-4 border-2 border-[#0066FF]/20">
+                          
+                          {/* HIỆU ỨNG QUÉT QR */}
+                          <div className="bg-[#050a14] p-8 flex flex-col items-center border-t border-slate-800 relative overflow-hidden">
+                            <div className="bg-white p-3 rounded-2xl mb-4 border-2 border-[#0066FF]/20 relative overflow-hidden">
                               <QRCodeSVG value={ticket.qrCodeValue} size={140} />
+                              
+                              {/* ĐƯỜNG QUÉT CHẠY DỌC */}
+                              <Motion.div
+                                initial={{ y: "-100%" }}
+                                animate={{ y: "150%" }}
+                                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                                className="absolute inset-x-0 h-[2px] bg-[#0066FF] shadow-[0_0_10px_#0066FF] opacity-60"
+                              />
                             </div>
-                            <p className="text-[9px] font-black text-slate-500 tracking-[0.3em]">REF: {ticket.id}</p>
-                            <p className="text-[8px] text-[#0066FF] font-bold mt-1 uppercase">Updates in {qrCountdown}s</p>
+                            
+                            <p className="text-[9px] font-black text-slate-500 tracking-[0.3em] relative z-10">REF: {ticket.id}</p>
+                            <p className="text-[8px] text-[#0066FF] font-bold mt-1 uppercase relative z-10">Updates in {qrCountdown}s</p>
                           </div>
-                        </div>
+                        </Motion.div>
                       ))
                     )}
                   </Motion.div>
                 ) : (
                   <Motion.div 
                     key="txn" 
-                    initial={{ opacity: 0, y: 10 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    exit={{ opacity: 0, y: -10 }} 
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="show"
+                    exit="hidden"
                     className="space-y-4 w-full max-w-[600px]"
                   >
                     {transactions.length === 0 ? (
@@ -160,13 +204,18 @@ const OrderHistory = () => {
                       </div>
                     ) : (
                       transactions.map((txn) => (
-                        <div key={txn.id} className="bg-[#0b1222] border border-slate-800 p-6 rounded-3xl hover:border-[#0066FF] transition-all group shadow-xl">
+                        <Motion.div 
+                          key={txn.id} 
+                          variants={itemVariants}
+                          whileHover={{ scale: 1.02, borderColor: "#0066FF", backgroundColor: "rgba(0, 102, 255, 0.05)" }}
+                          className="bg-[#0b1222] border border-slate-800 p-6 rounded-3xl transition-all group shadow-xl"
+                        >
                           <div className="flex justify-between items-center">
                             <h4 className="font-black uppercase italic group-hover:text-[#0066FF] transition-colors">{txn.content}</h4>
                             <p className="text-2xl font-black text-[#0066FF] italic">{formatVnd(txn.amount)}</p>
                           </div>
                           <p className="text-[10px] text-slate-500 font-bold uppercase mt-2">{txn.date} • {txn.method}</p>
-                        </div>
+                        </Motion.div>
                       ))
                     )}
                   </Motion.div>
