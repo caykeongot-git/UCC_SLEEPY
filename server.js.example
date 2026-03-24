@@ -1,0 +1,311 @@
+/**
+ * ============================================
+ * server.js - CINEMA BOOKING BACKEND
+ * ============================================
+ * 
+ * Copy file này vào thư mục backend của bạn
+ * Sau đó chạy: npm start
+ * 
+ */
+
+const express = require('express');
+const cors = require('cors');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ============================================
+// MIDDLEWARE
+// ============================================
+
+// CORS Configuration
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://localhost:5176',
+    'http://localhost:5177',
+    'http://localhost:5178'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  maxAge: 86400
+};
+
+// Apply CORS - QUAN TRỌNG: PHẢI TRƯỚC ROUTES
+app.use(cors(corsOptions));
+
+// Body parser
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Request logging (optional)
+app.use((req, res, next) => {
+  console.log(`📨 ${req.method} ${req.path}`);
+  next();
+});
+
+// ============================================
+// ROUTES - AUTH
+// ============================================
+
+app.post('/api/auth/register', (req, res) => {
+  try {
+    const { email, password, name, phoneNumber } = req.body;
+
+    // TODO: Implement your register logic here
+    // - Validate input
+    // - Hash password
+    // - Save to database
+    // - Return JWT token
+
+    res.status(201).json({
+      success: true,
+      message: 'Đăng ký thành công',
+      data: {
+        email,
+        name,
+        token: 'your-jwt-token-here'
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi đăng ký',
+      error: error.message
+    });
+  }
+});
+
+app.post('/api/auth/login', (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // TODO: Implement your login logic here
+    // - Validate email/password
+    // - Check database
+    // - Generate JWT token
+    // - Return token
+
+    res.status(200).json({
+      success: true,
+      message: 'Đăng nhập thành công',
+      data: {
+        token: 'your-jwt-token-here',
+        user: {
+          id: 1,
+          email,
+          name: 'User Name'
+        }
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi đăng nhập',
+      error: error.message
+    });
+  }
+});
+
+app.get('/api/auth/me', (req, res) => {
+  // TODO: Verify token and return user info
+  res.status(200).json({
+    success: true,
+    data: {
+      id: 1,
+      email: 'user@example.com',
+      name: 'Test User',
+      phoneNumber: '0123456789'
+    }
+  });
+});
+
+// ============================================
+// ROUTES - MOVIES
+// ============================================
+
+app.get('/api/movies', (req, res) => {
+  // TODO: Get movies from database
+  res.status(200).json({
+    success: true,
+    data: [
+      {
+        id: 1,
+        title: 'DUNE: PART TWO',
+        genre: 'Sci-Fi',
+        posterUrl: 'https://via.placeholder.com/300x450?text=DUNE',
+        duration: 166,
+        rating: 8.5
+      },
+      {
+        id: 2,
+        title: 'THE SHAWSHANK REDEMPTION',
+        genre: 'Drama',
+        posterUrl: 'https://via.placeholder.com/300x450?text=SHAWSHANK',
+        duration: 142,
+        rating: 9.3
+      }
+    ]
+  });
+});
+
+app.get('/api/movies/:id', (req, res) => {
+  // TODO: Get movie details from database
+  const { id } = req.params;
+  res.status(200).json({
+    success: true,
+    data: {
+      id,
+      title: 'DUNE: PART TWO',
+      genre: 'Sci-Fi',
+      posterUrl: 'https://via.placeholder.com/300x450?text=DUNE',
+      duration: 166,
+      rating: 8.5,
+      description: 'Epic sci-fi adventure'
+    }
+  });
+});
+
+// ============================================
+// ROUTES - SHOWTIMES & SEATS
+// ============================================
+
+app.get('/api/showtimes', (req, res) => {
+  // TODO: Get showtimes from database with filter options
+  const { movieId, cinemaId, date } = req.query;
+
+  res.status(200).json({
+    success: true,
+    data: [
+      {
+        id: 1,
+        movieId: 1,
+        cinemaId: 1,
+        cinemaName: 'Cinema Quantum',
+        date: '2026-03-24',
+        time: '14:00',
+        format: 'IMAX 2D',
+        availableSeats: 45
+      }
+    ]
+  });
+});
+
+app.get('/api/showtimes/:id', (req, res) => {
+  // TODO: Get showtime details
+  const { id } = req.params;
+  res.status(200).json({
+    success: true,
+    data: {
+      id,
+      movieId: 1,
+      cinemaId: 1,
+      cinemaName: 'Cinema Quantum',
+      date: '2026-03-24',
+      time: '14:00',
+      format: 'IMAX 2D'
+    }
+  });
+});
+
+app.get('/api/showtimes/:id/seats', (req, res) => {
+  // TODO: Get seat map from database
+  // Calculate: AVAILABLE, BOOKED, HELD status
+  const { id } = req.params;
+
+  // Mock seat data
+  const seats = [];
+  const rows = ['A', 'B', 'C', 'D', 'E'];
+  const cols = 10;
+
+  for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+    for (let col = 1; col <= cols; col++) {
+      const isBooked = Math.random() > 0.7;
+      seats.push({
+        id: `${rows[rowIdx]}${col}`,
+        row: rows[rowIdx],
+        number: col,
+        status: isBooked ? 'BOOKED' : 'AVAILABLE'
+      });
+    }
+  }
+
+  res.status(200).json({
+    success: true,
+    data: seats
+  });
+});
+
+// ============================================
+// ROUTES - BOOKINGS
+// ============================================
+
+app.post('/api/bookings/hold', (req, res) => {
+  // TODO: Hold a seat for 5 minutes
+  const { showtimeId, seatId } = req.body;
+
+  res.status(200).json({
+    success: true,
+    message: 'Ghế đã được giữ trong 5 phút',
+    data: {
+      showtimeId,
+      seatId,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+    }
+  });
+});
+
+app.post('/api/bookings/checkout', (req, res) => {
+  // TODO: Process booking and payment
+  // - Verify seats still available
+  // - Create bill with transaction
+  // - Generate QR code
+  // - Send email
+  const { showtimeId, seatIds, paymentMethod } = req.body;
+
+  res.status(200).json({
+    success: true,
+    message: 'Đặt vé thành công',
+    data: {
+      orderId: 'ORD-' + Date.now(),
+      showtimeId,
+      seatIds,
+      totalPrice: seatIds.length * 100000,
+      paymentMethod,
+      qrCode: 'https://via.placeholder.com/200x200?text=QR'
+    }
+  });
+});
+
+// ============================================
+// ERROR HANDLING
+// ============================================
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
+
+// ============================================
+// START SERVER
+// ============================================
+
+app.listen(PORT, () => {
+  console.log(`
+╔════════════════════════════════════════╗
+║   🎬 CINEMA BOOKING BACKEND STARTED    ║
+╚════════════════════════════════════════╝
+  
+  ✅ Server: http://localhost:${PORT}
+  🔓 CORS: Enabled
+  📝 API: /api/auth/*, /api/movies, /api/bookings/*
+  
+  Next step: Mở frontend tại http://localhost:5177
+  `);
+});

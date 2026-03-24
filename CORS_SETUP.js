@@ -1,0 +1,105 @@
+/* eslint-disable */
+
+/**
+ * ============================================
+ * CẤU HÌNH CORS CHO BACKEND NODE.JS
+ * ============================================
+ *
+ * BƯỚC 1: Cài đặt cors package
+ * Chạy trong terminal backend:
+ *   npm install cors
+ *
+ * BƯỚC 2: Copy code dưới đây vào server.js chính
+ * ============================================
+ */
+
+/**
+ * ============================================
+ * PHƯƠNG THỨC 1: Sử dụng cors package (KHUYÊN DÙNG)
+ * ============================================
+ */
+ /* PHƯƠNG THỨC 1: Sử dụng cors package (KHUYÊN DÙNG)
+ * ============================================
+ */
+ /* PHƯƠNG THỨC 1: Sử dụng cors package (KHUYÊN DÙNG)
+ * ============================================
+ */
+
+const express = require('express');
+const cors = require('cors');
+
+const app = express();
+
+// CẤU HÌNH CORS
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://localhost:5176',
+    'http://localhost:5177',
+    'http://localhost:5178',
+    'https://your-production-domain.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  maxAge: 86400 // 24 hours
+};
+
+// QUAN TRỌNG: Thêm cors TRƯỚC các routes khác
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes của bạn
+app.post('/api/auth/register', (req, res) => {
+  // Xử lý register
+  res.json({ message: 'Register success' });
+});
+
+app.post('/api/auth/login', (req, res) => {
+  // Xử lý login
+  res.json({ token: 'your-jwt-token' });
+});
+
+// Khởi động server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`🔓 CORS enabled for development`);
+});
+
+/**
+ * ============================================
+ * PHƯƠNG THỨC 2: Manual CORS headers (Nếu không dùng cors package)
+ * ============================================
+ */
+
+// Nếu không dùng cors package, thay thế phần app.use(cors(corsOptions)) bằng middleware này:
+// (Đặt TRƯỚC các routes khác, SAU app = express())
+
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', 'http://localhost:5177');
+//   res.header('Access-Control-Allow-Credentials', 'true');
+//   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+//   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+//
+//   if (req.method === 'OPTIONS') {
+//     res.sendStatus(200);
+//   } else {
+//     next();
+//   }
+// });
+
+/**
+ * ============================================
+ * LƯU Ý QUAN TRỌNG
+ * ============================================
+ *
+ * 1. CORS middleware PHẢI được đặt TRƯỚC tất cả routes
+ * 2. credentials: true cho phép gửi cookies và Authorization headers
+ * 3. Thay 'http://localhost:5177' bằng domain thực tế của frontend
+ * 4. Trong production, chỉ cho phép domain cụ thể, KHÔNG dùng '*'
+ */
