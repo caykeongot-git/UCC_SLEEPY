@@ -8,7 +8,10 @@ import axios from 'axios';
 // 1. Khởi tạo Axios
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
-  withCredentials: true 
+  withCredentials: true,
+  headers: {
+    'ngrok-skip-browser-warning': 'true'
+  }
 });
 
 // 2. Interceptor (Sát thủ ngầm): Tự động nhét Token vào mọi Request
